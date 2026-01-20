@@ -1,0 +1,22 @@
+{
+  "name": "@helpdesk/core",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./validators/ticket": "./src/validators/ticket.ts",
+    "./validators/kb": "./src/validators/kb.ts",
+    "./services/email": "./src/services/email.ts",
+    "./services/sla": "./src/services/sla.ts"
+  },
+  "dependencies": {
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.2",
+    "typescript": "^5.9.3"
+  }
+}

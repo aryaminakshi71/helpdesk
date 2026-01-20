@@ -1,0 +1,27 @@
+{
+  "name": "@helpdesk/env",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "browser": "./src/client.ts",
+      "default": "./src/client.ts"
+    },
+    "./server": "./src/server.ts",
+    "./client": "./src/client.ts",
+    "./cloudflare": "./src/cloudflare.d.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@helpdesk/tsconfig": "workspace:*",
+    "@types/node": "^22.19.2",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
+  }
+}

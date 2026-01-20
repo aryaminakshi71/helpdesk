@@ -1,0 +1,86 @@
+{
+  "$schema": "https://turbo.build/schema.v2.json",
+  "ui": "tui",
+
+  "globalEnv": ["NODE_ENV"],
+
+  "globalPassThroughEnv": [
+    "DATABASE_URL",
+
+    "BETTER_AUTH_SECRET",
+
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "GITHUB_CLIENT_ID",
+    "GITHUB_CLIENT_SECRET",
+
+    "CLOUDFLARE_ACCOUNT_ID",
+    "R2_BUCKET_NAME",
+    "R2_ACCESS_KEY_ID",
+    "R2_SECRET_ACCESS_KEY",
+
+    "STRIPE_SECRET_KEY",
+    "STRIPE_WEBHOOK_SECRET",
+
+    "UPSTASH_REDIS_REST_URL",
+    "UPSTASH_REDIS_REST_TOKEN",
+
+    "VERCEL_ENV",
+    "VITE_PUBLIC_SITE_URL",
+    "VITE_PUBLIC_STRIPE_PUBLISHABLE_KEY"
+  ],
+
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+
+    "helpdesk-web#build": {
+      "outputs": [".output/**", "!.output/cache/**"],
+      "dependsOn": ["^build"],
+
+      "env": ["DATABASE_URL"],
+
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env.production.local",
+        ".env.local",
+        ".env.production",
+        ".env.development.local",
+        ".env.development",
+        ".env"
+      ]
+    },
+
+    "dev": {
+      "persistent": true,
+      "cache": false
+    },
+
+    "typecheck": {
+      "dependsOn": ["^build", "^typecheck"]
+    },
+
+    "clean": {
+      "cache": false
+    },
+
+    "db:generate": {
+      "cache": false
+    },
+
+    "db:migrate": {
+      "cache": false
+    },
+
+    "db:push": {
+      "cache": false
+    },
+
+    "db:studio": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}

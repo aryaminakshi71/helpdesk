@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../packages/tsconfig/base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "types": [
+      "@cloudflare/workers-types"
+    ],
+    "paths": {
+      "@helpdesk/core": [
+        "../../packages/core/src/index.ts"
+      ],
+      "@helpdesk/core/*": [
+        "../../packages/core/src/*"
+      ],
+      "@helpdesk/auth": [
+        "../../packages/auth/src/index.ts"
+      ],
+      "@helpdesk/auth/*": [
+        "../../packages/auth/src/*"
+      ],
+      "@helpdesk/storage": [
+        "../../packages/storage/src/db/index.ts"
+      ],
+      "@helpdesk/storage/*": [
+        "../../packages/storage/src/*"
+      ],
+      "@helpdesk/env": [
+        "../../packages/env/src/index.ts"
+      ],
+      "@helpdesk/env/*": [
+        "../../packages/env/src/*"
+      ],
+      "@helpdesk/logger": [
+        "../../packages/logger/src/index.ts"
+      ],
+      "@helpdesk/logger/*": [
+        "../../packages/logger/src/*"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

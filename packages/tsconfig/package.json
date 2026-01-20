@@ -1,0 +1,9 @@
+{
+  "name": "@helpdesk/tsconfig",
+  "version": "0.0.0",
+  "private": true,
+  "license": "PROPRIETARY",
+  "files": [
+    "*.json"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "name": "@helpdesk/api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./app": "./src/app.ts",
+    "./router": "./src/routers/index.ts",
+    "./procedures": "./src/procedures/index.ts",
+    "./context": "./src/context.ts"
+  },
+  "dependencies": {
+    "@helpdesk/auth": "workspace:*",
+    "@helpdesk/storage": "workspace:*",
+    "@helpdesk/logger": "workspace:*",
+    "@orpc/openapi": "^1.11.2",
+    "@orpc/server": "^1.11.2",
+    "@orpc/zod": "^1.11.2",
+    "drizzle-orm": "^0.45.0",
+    "hono": "^4.7.10",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@helpdesk/tsconfig": "workspace:*",
+    "@cloudflare/workers-types": "^4.20250109.0",
+    "@types/node": "^22.19.2",
+    "typescript": "^5.9.3"
+  }
+}
