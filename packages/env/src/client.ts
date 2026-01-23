@@ -26,6 +26,8 @@ export const clientSchema = z.object({
     .url()
     .optional()
     .default("https://us.i.posthog.com"),
+  // CDN URL for optimized images (Cloudflare R2 or Images)
+  VITE_PUBLIC_CDN_URL: z.string().url().optional(),
 });
 
 export type ClientEnv = z.infer<typeof clientSchema>;
@@ -44,6 +46,7 @@ export const env: ClientEnv = (() => {
         import.meta.env?.VITE_PUBLIC_STRIPE_PUBLISHABLE_KEY,
       VITE_PUBLIC_POSTHOG_KEY: import.meta.env?.VITE_PUBLIC_POSTHOG_KEY,
       VITE_PUBLIC_POSTHOG_HOST: import.meta.env?.VITE_PUBLIC_POSTHOG_HOST,
+      VITE_PUBLIC_CDN_URL: import.meta.env?.VITE_PUBLIC_CDN_URL,
     });
   } catch (error) {
     if (error instanceof z.ZodError) {

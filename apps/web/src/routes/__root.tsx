@@ -8,6 +8,7 @@ import {
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
+import { PostHogProvider } from '@/components/providers/posthog-provider'
 
 import appCss from '@/styles/globals.css?url'
 
@@ -42,10 +43,12 @@ function RootDocument() {
         <HeadContent />
       </head>
       <body>
-        <QueryClientProvider client={queryClient}>
-          <Outlet />
-          <Toaster position="top-right" richColors />
-        </QueryClientProvider>
+        <PostHogProvider>
+          <QueryClientProvider client={queryClient}>
+            <Outlet />
+            <Toaster position="top-right" richColors />
+          </QueryClientProvider>
+        </PostHogProvider>
         {import.meta.env.PROD ? null : <TanStackRouterDevtools />}
         <Scripts />
       </body>

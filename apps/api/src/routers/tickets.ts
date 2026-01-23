@@ -7,6 +7,7 @@
 import { z } from 'zod'
 import { eq, and, ilike, desc, sql, count } from 'drizzle-orm'
 import { orgAuthed, getDb, schema } from '../procedures'
+import { getOrCache, invalidateCache } from '@helpdesk/storage/redis'
 import {
   createTicketSchema,
   updateTicketSchema,
@@ -111,56 +112,63 @@ export const ticketsRouter = {
     .handler(async ({ context, input }: { context: OrgContext; input: { id: string } }) => {
       const db = getDb(context)
 
-      const [ticket] = await db
-        .select()
-        .from(schema.tickets)
-        .where(
-          and(
-            eq(schema.tickets.id, input.id),
-            eq(schema.tickets.organizationId, context.organization.id),
-          ),
-        )
-        .limit(1)
+      // Cache ticket with related data (30 minutes TTL)
+      return await getOrCache(
+        `ticket:${input.id}`,
+        async () => {
+          const [ticket] = await db
+            .select()
+            .from(schema.tickets)
+            .where(
+              and(
+                eq(schema.tickets.id, input.id),
+                eq(schema.tickets.organizationId, context.organization.id),
+              ),
+            )
+            .limit(1)
 
-      if (!ticket) {
-        throw new ORPCError('NOT_FOUND', {
-          message: 'Ticket not found',
-        })
-      }
+          if (!ticket) {
+            throw new ORPCError('NOT_FOUND', {
+              message: 'Ticket not found',
+            })
+          }
 
-      // Get comments
-      const comments = await db
-        .select()
-        .from(schema.ticketComments)
-        .where(eq(schema.ticketComments.ticketId, ticket.id))
-        .orderBy(schema.ticketComments.createdAt)
+          // Get comments
+          const comments = await db
+            .select()
+            .from(schema.ticketComments)
+            .where(eq(schema.ticketComments.ticketId, ticket.id))
+            .orderBy(schema.ticketComments.createdAt)
 
-      // Get attachments
-      const attachments = await db
-        .select()
-        .from(schema.ticketAttachments)
-        .where(eq(schema.ticketAttachments.ticketId, ticket.id))
+          // Get attachments
+          const attachments = await db
+            .select()
+            .from(schema.ticketAttachments)
+            .where(eq(schema.ticketAttachments.ticketId, ticket.id))
 
-      // Get tags
-      const tags = await db
-        .select()
-        .from(schema.ticketTags)
-        .where(eq(schema.ticketTags.ticketId, ticket.id))
+          // Get tags
+          const tags = await db
+            .select()
+            .from(schema.ticketTags)
+            .where(eq(schema.ticketTags.ticketId, ticket.id))
 
-      // Get SLA status if exists
-      const [slaStatus] = await db
-        .select()
-        .from(schema.slaStatus)
-        .where(eq(schema.slaStatus.ticketId, ticket.id))
-        .limit(1)
+          // Get SLA status if exists
+          const [slaStatus] = await db
+            .select()
+            .from(schema.slaStatus)
+            .where(eq(schema.slaStatus.ticketId, ticket.id))
+            .limit(1)
 
-      return {
-        ...ticket,
-        comments,
-        attachments,
-        tags: tags.map((t) => t.tag),
-        slaStatus: slaStatus || null,
-      }
+          return {
+            ...ticket,
+            comments,
+            attachments,
+            tags: tags.map((t) => t.tag),
+            slaStatus: slaStatus || null,
+          };
+        },
+        1800 // 30 minutes
+      );
     }),
 
   /**
@@ -246,6 +254,9 @@ export const ticketsRouter = {
       }
 
       context.logger.info({ ticketId: ticket.id }, 'Ticket created')
+
+      // Invalidate tickets list cache
+      await invalidateCache(`tickets:list:${context.organization.id}`);
 
       return ticket
     }),
@@ -351,6 +362,10 @@ export const ticketsRouter = {
 
       context.logger.info({ ticketId: ticket.id }, 'Ticket updated')
 
+      // Invalidate caches
+      await invalidateCache(`ticket:${ticket.id}`);
+      await invalidateCache(`tickets:list:${context.organization.id}`);
+
       return ticket
     }),
 
@@ -390,6 +405,10 @@ export const ticketsRouter = {
       await db.delete(schema.tickets).where(eq(schema.tickets.id, input.id))
 
       context.logger.info({ ticketId: input.id }, 'Ticket deleted')
+
+      // Invalidate caches
+      await invalidateCache(`ticket:${input.id}`);
+      await invalidateCache(`tickets:list:${context.organization.id}`);
 
       return { success: true }
     }),

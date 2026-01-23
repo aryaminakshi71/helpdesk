@@ -15,6 +15,9 @@ import { appRouter } from "./routers";
 import { createDb } from "@helpdesk/storage";
 import { createAuthFromEnv } from "./lib/create-auth-from-env";
 import { loggerMiddleware } from "./middleware/logger";
+import { initSentry } from "./lib/sentry";
+import { initDatadog } from "./lib/datadog";
+import { rateLimitRedis } from "./middleware/rate-limit-redis";
 import type { AppEnv, InitialContext } from "./context";
 
 /**
@@ -23,10 +26,18 @@ import type { AppEnv, InitialContext } from "./context";
 export function createApp() {
   const app = new Hono<{ Bindings: AppEnv }>();
 
+  // Initialize monitoring
+  initSentry();
+  initDatadog();
+
   // Global middleware
   app.use("*", cors({ origin: (origin: string | null) => origin, credentials: true }));
   app.use("*", requestId());
   app.use("*", loggerMiddleware);
+
+  // Rate limiting middleware
+  app.use("/api/*", rateLimitRedis({ limiterType: "api" }));
+  app.use("/api/auth/*", rateLimitRedis({ limiterType: "auth" }));
 
   // Health check (non-RPC)
   app.get("/api/health", (c: any) => {

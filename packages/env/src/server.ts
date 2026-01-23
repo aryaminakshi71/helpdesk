@@ -35,11 +35,44 @@ const serverSchema = clientSchema.extend({
   GITHUB_CLIENT_SECRET: z.string().optional(),
 
   // ============================================================================
+  // REDIS (Upstash)
+  // Uses REST API naming convention expected by @upstash/redis fromEnv()
+  // ============================================================================
+
+  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+
+  // ============================================================================
   // STRIPE BILLING
   // ============================================================================
 
   STRIPE_SECRET_KEY: z.string().startsWith("sk_").optional(),
   STRIPE_WEBHOOK_SECRET: z.string().startsWith("whsec_").optional(),
+
+  // ============================================================================
+  // MONITORING (Sentry)
+  // ============================================================================
+
+  SENTRY_DSN: z.string().url().optional(),
+  SENTRY_ENVIRONMENT: z.string().optional(),
+  SENTRY_DEBUG: z.string().optional(),
+
+  // ============================================================================
+  // APM (Datadog)
+  // ============================================================================
+
+  DATADOG_API_KEY: z.string().optional(),
+  DATADOG_SERVICE_NAME: z.string().optional(),
+  DATADOG_ENV: z.string().optional(),
+  DATADOG_VERSION: z.string().optional(),
+
+  // ============================================================================
+  // LOG AGGREGATION
+  // ============================================================================
+
+  LOG_AGGREGATION_ENDPOINT: z.string().url().optional(),
+  LOG_AGGREGATION_API_KEY: z.string().optional(),
+  LOG_AGGREGATION_SERVICE: z.enum(["datadog", "logtail", "cloudwatch", "custom"]).optional(),
 });
 
 export type ServerEnv = z.infer<typeof serverSchema>;

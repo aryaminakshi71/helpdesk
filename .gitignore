@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+.output/
+
+# Turborepo
+.turbo/
+
+# TanStack
+.tanstack/
+.nitro/
+
+# Cloudflare
+.wrangler/
+worker-configuration.d.ts
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.development
+.env.test
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Coverage
+coverage/
+*.lcov
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/
+
+# Claude/Cursor
+.claude/settings.local.json
+.cursor/plans/
+
+# Misc
+*.local
+count.txt
+todos.json
