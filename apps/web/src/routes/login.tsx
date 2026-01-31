@@ -82,17 +82,21 @@ function LoginPage() {
   const handleDemoLogin = async () => {
     setIsLoading(true);
     try {
+      // Demo credentials from environment variables
+      const demoEmail = import.meta.env.VITE_DEMO_EMAIL || "demo@helpdesk.example";
+      const demoPassword = import.meta.env.VITE_DEMO_PASSWORD || "demo123456";
+      
       // Try to sign in with demo credentials
       const { error } = await authClient.signIn.email({
-        email: "demo@helpdesk.example",
-        password: "demo123456",
+        email: demoEmail,
+        password: demoPassword,
       });
 
       if (error) {
         // If demo user doesn't exist, create it first
         const signUpResult = await authClient.signUp.email({
-          email: "demo@helpdesk.example",
-          password: "demo123456",
+          email: demoEmail,
+          password: demoPassword,
           name: "Demo User",
         });
 
@@ -103,8 +107,8 @@ function LoginPage() {
 
         // Sign in after creating demo account
         await authClient.signIn.email({
-          email: "demo@helpdesk.example",
-          password: "demo123456",
+          email: demoEmail,
+          password: demoPassword,
         });
       }
 
