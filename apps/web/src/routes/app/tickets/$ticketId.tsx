@@ -17,6 +17,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/tickets/$ticketId")({
@@ -33,7 +34,7 @@ function CommentForm({ ticketId }: { ticketId: string }) {
       toast.success("Comment added");
       setContent("");
       setIsInternal(false);
-      queryClient.invalidateQueries({ queryKey: orpc.tickets.get.key });
+      queryClient.invalidateQueries({ queryKey: ['tickets', 'get'] });
     },
     onError: (err) => {
       toast.error(err.message || "Failed to add comment");
@@ -86,14 +87,15 @@ function TicketDetailPage() {
   const { data: session } = authClient.useSession();
   const queryClient = useQueryClient();
 
-  const { data: ticket, isLoading } = useQuery(orpc.tickets.get.queryOptions({ input: { id: ticketId } }, {
+  const { data: ticket, isLoading } = useQuery(orpc.tickets.get.queryOptions({
+    input: { id: ticketId },
     refetchInterval: 5000
   }));
 
   const assignTicket = useMutation(orpc.tickets.assign.mutationOptions({
     onSuccess: () => {
       toast.success("Ticket assigned");
-      queryClient.invalidateQueries({ queryKey: orpc.tickets.get.key });
+      queryClient.invalidateQueries({ queryKey: ['tickets', 'get'] });
     },
     onError: (err) => {
       toast.error(err.message || "Failed to assign ticket");

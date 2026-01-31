@@ -86,7 +86,7 @@ export const filesRouter = {
 
       // Upload to R2
       const uploadResult = await uploadToR2(
-        bucket,
+        bucket as any,
         fileBlob,
         input.fileName,
         {
@@ -122,7 +122,7 @@ export const filesRouter = {
       if (!attachment) {
         // Clean up R2 file if DB insert failed
         if (bucket) {
-          await deleteFromR2(bucket, uploadResult.key)
+          await deleteFromR2(bucket as any, uploadResult.key)
         }
         throw new ORPCError('INTERNAL_SERVER_ERROR', {
           message: 'Failed to create attachment record',
@@ -191,7 +191,7 @@ export const filesRouter = {
           message: 'R2 bucket not configured',
         })
       }
-      await deleteFromR2(bucket, attachment.fileKey)
+      await deleteFromR2(bucket as any, attachment.fileKey)
 
       // Delete from database
       await db

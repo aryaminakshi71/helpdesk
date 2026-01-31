@@ -565,7 +565,7 @@ export const ticketsRouter = {
       }
 
       context.logger.info(
-        { ticketId: id, commentId: comment.id },
+        { ticketId: id, commentId: comment?.id },
         'Comment added',
       )
 

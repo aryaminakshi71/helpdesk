@@ -4,10 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite dev --port 3003",
+    "dev": "vite dev --port 3006",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "wrangler deploy --minify",
+    "deploy": "wrangler deploy -c dist/server/wrangler.json --minify",
     "cf-typegen": "wrangler types ../../packages/env/src/cloudflare.d.ts --env-interface Env",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

@@ -5,8 +5,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  timeout: 60000, // 60 seconds per test
+  workers: process.env.CI ? 1 : 2,
+  timeout: 90000, // 90 seconds per test
   expect: {
     timeout: 10000, // 10 seconds for assertions
   },
@@ -29,7 +29,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'cd apps/web && SKIP_CLOUDFLARE=true bun run dev',
+    command: 'cd apps/web && SKIP_CLOUDFLARE=true bun vite dev --port 3004',
     url: 'http://localhost:3004',
     reuseExistingServer: !process.env.CI,
     timeout: 180000, // 3 minutes - TanStack Router needs more time

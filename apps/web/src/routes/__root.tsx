@@ -43,12 +43,10 @@ function RootDocument() {
         <HeadContent />
       </head>
       <body>
-        <PostHogProvider>
-          <QueryClientProvider client={queryClient}>
-            <Outlet />
-            <Toaster position="top-right" richColors />
-          </QueryClientProvider>
-        </PostHogProvider>
+        <QueryClientProvider client={queryClient}>
+          <Outlet />
+          <Toaster position="top-right" richColors />
+        </QueryClientProvider>
         {import.meta.env.PROD ? null : <TanStackRouterDevtools />}
         <Scripts />
       </body>

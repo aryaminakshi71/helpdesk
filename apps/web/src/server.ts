@@ -18,7 +18,7 @@ declare module "@tanstack/react-start" {
   interface Register {
     ssr: true;
     router: ReturnType<typeof getRouter>;
-    config: ReturnType<typeof startInstance.getOptions>;
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>;
     server: {
       requestContext: CloudflareRequestContext;
     };

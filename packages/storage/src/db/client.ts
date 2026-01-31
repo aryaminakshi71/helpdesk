@@ -1,5 +1,7 @@
-import { drizzle } from "drizzle-orm/neon-serverless";
+import { drizzle as neonDrizzle } from "drizzle-orm/neon-serverless";
 import { neonConfig } from "@neondatabase/serverless";
+import { drizzle as pgDrizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import * as schema from "./schema";
 
 /**
@@ -32,11 +34,20 @@ export function createDb(
     url = process.env.DATABASE_URL!;
   }
 
+  // Use standard Postgres driver for local development if URL points to localhost
+  const isLocal = url.includes("localhost") || url.includes("127.0.0.1") || url.includes("0.0.0.0");
+
+  console.log(`[Database] Connecting to ${isLocal ? "Local Postgres" : "Neon Serverless"}...`);
+  if (isLocal) {
+    const queryClient = postgres(url);
+    return pgDrizzle(queryClient, { schema });
+  }
+
   // Optimize Neon for Cloudflare Workers
   neonConfig.fetchConnectionCache = true;
-  
+
   // drizzle-orm/neon-serverless accepts connection string directly
-  return drizzle(url, { schema });
+  return neonDrizzle(url, { schema });
 }
 
 /**

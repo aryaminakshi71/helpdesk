@@ -39,8 +39,7 @@ function TicketsPage() {
       priority: filters.priority as any,
       limit: 100,
       offset: 0,
-    }
-  }, {
+    },
     refetchInterval: 5000,
   }));
 

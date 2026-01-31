@@ -24,7 +24,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
-    "composite": true,
+    "composite": false,
     "baseUrl": ".",
     "paths": {
       "@/*": [

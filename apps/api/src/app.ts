@@ -35,6 +35,16 @@ export function createApp() {
   app.use("*", requestId());
   app.use("*", loggerMiddleware);
 
+  // Populate env from process.env if missing (e.g. running in local Vite/Bun without Cloudflare plugin)
+  app.use("*", async (c, next) => {
+    // @ts-ignore
+    c.env = {
+      ...process.env,
+      ...(c.env || {}),
+    };
+    await next();
+  });
+
   // Rate limiting middleware
   app.use("/api/*", rateLimitRedis({ limiterType: "api" }));
   app.use("/api/auth/*", rateLimitRedis({ limiterType: "auth" }));
@@ -51,16 +61,25 @@ export function createApp() {
   // Better Auth handler (includes Stripe webhook at /api/auth/stripe/webhook)
   app.on(["GET", "POST"], "/api/auth/*", async (c: any) => {
     // Handle both Hyperdrive binding and direct connection string
-    const connectionString = c.env.DATABASE?.connectionString || (c.env as any).DATABASE_URL;
+    const connectionString = c.env.DATABASE?.connectionString || (c.env as any).DATABASE_URL || process.env.DATABASE_URL;
 
+    console.log(`[Auth Handler] Path: ${c.req.path}, Method: ${c.req.method}`);
+    console.log(`[Auth Handler] Connection String length: ${connectionString?.length || 0}`);
     if (!connectionString) {
-      console.error("Missing DATABASE binding or DATABASE_URL");
+      console.error("[Auth Handler] Missing DATABASE binding or DATABASE_URL");
       return c.json({ error: "Database configuration error" }, 500);
     }
 
-    const db = createDb({ connectionString });
-    const auth = createAuthFromEnv(db, c.env);
-    return auth.handler(c.req.raw);
+    try {
+      const db = createDb({ connectionString });
+      const auth = createAuthFromEnv(db, c.env);
+      const res = await auth.handler(c.req.raw);
+      console.log(`[Auth Handler] Responding with status: ${res.status}`);
+      return res;
+    } catch (err) {
+      console.error("[Auth Handler] Error:", err);
+      return c.json({ error: "Internal server error during auth" }, 500);
+    }
   });
 
   // oRPC handler

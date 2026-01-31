@@ -33,7 +33,7 @@ function KBPage() {
     onSuccess: () => {
       toast.success("Article created successfully");
       setShowCreateForm(false);
-      queryClient.invalidateQueries({ queryKey: orpc.kb.list.key });
+      queryClient.invalidateQueries({ queryKey: ['kb', 'list'] });
     },
     onError: (err) => {
       toast.error(err.message || "Failed to create article");

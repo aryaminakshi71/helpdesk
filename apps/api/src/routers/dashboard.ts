@@ -184,7 +184,7 @@ export const dashboardRouter = {
           )
 
         trends.push({
-          day: date.toISOString().split('T')[0],
+          day: date.toISOString().split('T')[0] || '',
           value: result?.count || 0,
         })
       }

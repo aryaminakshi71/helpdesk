@@ -128,5 +128,5 @@ export function getDefaultSLATargets(
     },
   };
 
-  return targets[priority] || targets.medium;
+  return targets[priority]!;
 }

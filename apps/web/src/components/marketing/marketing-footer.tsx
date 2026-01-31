@@ -20,7 +20,7 @@ const footerNavigation: FooterColumn[] = [
             { label: "Features", href: "/#features" },
             { label: "Pricing", href: "/#pricing" },
             { label: "Industries", href: "/industries" },
-            { label: "API", href: "/docs/api" },
+            { label: "API", href: "/docs" },
         ],
     },
     {
