@@ -6,6 +6,7 @@
 
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { lazy, Suspense } from "react";
 import { orpc } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,7 +18,10 @@ import {
   TrendingUp,
   AlertTriangle,
 } from "lucide-react";
-import { RevenueChart } from "@/components/charts/revenue-chart";
+import { ComponentLoadingSkeleton } from "@/components/lazy-loading";
+
+// Lazy load chart component
+const RevenueChart = lazy(() => import("@/components/charts/revenue-chart").then(m => ({ default: m.RevenueChart })));
 
 export const Route = createFileRoute("/app/")({
   component: DashboardHome,
@@ -138,7 +142,9 @@ function DashboardHome() {
           </CardHeader>
           <CardContent>
             {trends?.trends ? (
-              <RevenueChart data={trends.trends} />
+              <Suspense fallback={<ComponentLoadingSkeleton />}>
+                <RevenueChart data={trends.trends} />
+              </Suspense>
             ) : (
               <Skeleton className="h-[300px]" />
             )}

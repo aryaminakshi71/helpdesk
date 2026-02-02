@@ -75,9 +75,15 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
+      port: Number(process.env.PORT) || 3000,
       host: true,
-      port: 3006,
-      strictPort: true, // Keep strict to ensure consistent port for Playwright tests
+      strictPort: false,
+    },
+    build: {
+      target: 'esnext',
+      minify: 'esbuild',
+      sourcemap: false,
+      chunkSizeWarningLimit: 1000,
     },
     plugins: [
       // Path aliases from tsconfig
