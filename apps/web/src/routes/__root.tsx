@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   HeadContent,
   Scripts,
@@ -11,6 +11,7 @@ import { Toaster } from 'sonner'
 import { PostHogProvider } from '@/components/providers/posthog-provider'
 import { ErrorPage, NotFoundPage } from '@/components/error'
 import { generateOrganizationSchema, generateWebSiteSchema, getHelpdeskOrganizationSchema } from '@/lib/structured-data'
+import { registerServiceWorker } from '@/lib/service-worker'
 
 import appCss from '@/styles/globals.css?url'
 
@@ -40,6 +41,11 @@ export const Route = createRootRoute({
 })
 
 function RootDocument() {
+  // Register service worker
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
+
   // Create a single QueryClient instance that persists across renders
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {

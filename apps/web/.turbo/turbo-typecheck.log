@@ -1,2 +1,7 @@
-
-[0m[2m[35m$[0m [2m[1mtsc --noEmit[0m
+$ tsc --noEmit
+../api/src/app.ts(7,22): error TS2307: Cannot find module 'hono' or its corresponding type declarations.
+../api/src/app.ts(8,22): error TS2307: Cannot find module 'hono/cors' or its corresponding type declarations.
+../api/src/app.ts(9,27): error TS2307: Cannot find module 'hono/request-id' or its corresponding type declarations.
+../api/src/app.ts(10,28): error TS2307: Cannot find module '@orpc/server/fetch' or its corresponding type declarations.
+../api/src/app.ts(11,34): error TS2307: Cannot find module '@orpc/openapi' or its corresponding type declarations.
+../api/src/app.ts(12,42): error TS2307: Cannot find module '@orpc/zod' or its corresponding type declarations.

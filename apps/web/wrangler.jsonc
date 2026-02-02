@@ -30,5 +30,8 @@
             "id": "local-cache-dev",
             "preview_id": "local-cache-preview"
         }
-    ]
+    ],
+    "dev": {
+        "port": 3004
+    }
 }
