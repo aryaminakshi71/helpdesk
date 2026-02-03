@@ -114,14 +114,43 @@ export async function getFromR2(
 
 /**
  * Generate presigned URL for file access (if needed)
+ * 
+ * Note: R2 doesn't have built-in presigned URLs like S3.
+ * This implementation uses public URLs if available, or provides
+ * a worker endpoint pattern for secure access.
  */
 export async function getPresignedUrl(
   bucket: R2Bucket,
   key: string,
   expiresIn: number = 3600, // 1 hour default
+  options?: {
+    publicUrl?: string;
+    workerEndpoint?: string;
+  }
 ): Promise<string> {
-  // Note: R2 doesn't have built-in presigned URLs like S3
-  // You would need to implement this via a Cloudflare Worker
-  // or use public bucket with custom domain
-  throw new Error('Presigned URLs not implemented. Use public bucket or custom domain.')
+  // If public URL is configured, return public URL
+  if (options?.publicUrl) {
+    return `${options.publicUrl}/${key}`;
+  }
+
+  // If worker endpoint is configured, return worker endpoint URL
+  // The worker should handle authentication and generate signed URLs
+  if (options?.workerEndpoint) {
+    const expiresAt = Math.floor(Date.now() / 1000) + expiresIn;
+    return `${options.workerEndpoint}/${key}?expires=${expiresAt}`;
+  }
+
+  // Fallback: Check if bucket is public (this requires R2 public access)
+  // In production, you should configure a custom domain for R2
+  const publicUrl = process.env.R2_PUBLIC_URL || process.env.R2_CUSTOM_DOMAIN;
+  if (publicUrl) {
+    return `${publicUrl}/${key}`;
+  }
+
+  throw new Error(
+    'Presigned URLs require either:\n' +
+    '1. R2_PUBLIC_URL or R2_CUSTOM_DOMAIN environment variable set\n' +
+    '2. A Cloudflare Worker endpoint configured for secure file access\n' +
+    '3. Public bucket access with custom domain configured in Cloudflare dashboard'
+  );
 }

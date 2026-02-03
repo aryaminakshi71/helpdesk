@@ -50,52 +50,62 @@ export const ticketsRouter = {
       const { status, priority, category, assignedTo, search, limit, offset } =
         input
 
-      // Build where conditions
-      const conditions = [
-        eq(schema.tickets.organizationId, context.organization.id),
-      ]
+      // Cache key for list queries
+      const cacheKey = `tickets:list:${context.organization.id}:${JSON.stringify(input)}`
 
-      if (status) {
-        conditions.push(eq(schema.tickets.status, status))
-      }
+      // Use cache for list queries (5 min TTL)
+      return getOrCache(
+        cacheKey,
+        async () => {
+          // Build where conditions
+          const conditions = [
+            eq(schema.tickets.organizationId, context.organization.id),
+          ]
 
-      if (priority) {
-        conditions.push(eq(schema.tickets.priority, priority))
-      }
+          if (status) {
+            conditions.push(eq(schema.tickets.status, status))
+          }
 
-      if (category) {
-        conditions.push(eq(schema.tickets.category, category))
-      }
+          if (priority) {
+            conditions.push(eq(schema.tickets.priority, priority))
+          }
 
-      if (assignedTo) {
-        conditions.push(eq(schema.tickets.assignedTo, assignedTo))
-      }
+          if (category) {
+            conditions.push(eq(schema.tickets.category, category))
+          }
 
-      if (search) {
-        conditions.push(
-          ilike(schema.tickets.subject, `%${search}%`),
-        )
-      }
+          if (assignedTo) {
+            conditions.push(eq(schema.tickets.assignedTo, assignedTo))
+          }
 
-      // Query with pagination
-      const tickets = await db
-        .select()
-        .from(schema.tickets)
-        .where(and(...conditions))
-        .orderBy(desc(schema.tickets.createdAt))
-        .limit(limit)
-        .offset(offset)
+          if (search) {
+            conditions.push(
+              ilike(schema.tickets.subject, `%${search}%`),
+            )
+          }
 
-      // Get total count
-      const [totalResult] = await db
-        .select({ count: count() })
-        .from(schema.tickets)
-        .where(and(...conditions))
+          // Query with pagination
+          const tickets = await db
+            .select()
+            .from(schema.tickets)
+            .where(and(...conditions))
+            .orderBy(desc(schema.tickets.createdAt))
+            .limit(limit)
+            .offset(offset)
 
-      return {
-        tickets,
-        total: totalResult?.count || 0,
-      }
+          // Get total count
+          const [totalResult] = await db
+            .select({ count: count() })
+            .from(schema.tickets)
+            .where(and(...conditions))
+
+          return {
+            tickets,
+            total: totalResult?.count || 0,
+          }
+        },
+        300 // 5 minutes
+      )
     }),
 
   /**
