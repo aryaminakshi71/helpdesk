@@ -28,6 +28,7 @@ import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 import { Route as AppTicketsRouteImport } from './routes/app/tickets'
 import { Route as AppSettingsRouteImport } from './routes/app/settings'
 import { Route as AppKbRouteImport } from './routes/app/kb'
+import { Route as AppBillingRouteImport } from './routes/app/billing'
 import { Route as AppTicketsTicketIdRouteImport } from './routes/app/tickets/$ticketId'
 import { Route as AppKbArticleIdRouteImport } from './routes/app/kb/$articleId'
 
@@ -126,6 +127,11 @@ const AppKbRoute = AppKbRouteImport.update({
   path: '/kb',
   getParentRoute: () => AppRoute,
 } as any)
+const AppBillingRoute = AppBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppTicketsTicketIdRoute = AppTicketsTicketIdRouteImport.update({
   id: '/$ticketId',
   path: '/$ticketId',
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/app/billing': typeof AppBillingRoute
   '/app/kb': typeof AppKbRouteWithChildren
   '/app/settings': typeof AppSettingsRoute
   '/app/tickets': typeof AppTicketsRouteWithChildren
@@ -169,6 +176,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/app/billing': typeof AppBillingRoute
   '/app/kb': typeof AppKbRouteWithChildren
   '/app/settings': typeof AppSettingsRoute
   '/app/tickets': typeof AppTicketsRouteWithChildren
@@ -193,6 +201,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/app/billing': typeof AppBillingRoute
   '/app/kb': typeof AppKbRouteWithChildren
   '/app/settings': typeof AppSettingsRoute
   '/app/tickets': typeof AppTicketsRouteWithChildren
@@ -218,6 +227,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/signup'
     | '/terms'
+    | '/app/billing'
     | '/app/kb'
     | '/app/settings'
     | '/app/tickets'
@@ -238,6 +248,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/signup'
     | '/terms'
+    | '/app/billing'
     | '/app/kb'
     | '/app/settings'
     | '/app/tickets'
@@ -261,6 +272,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/signup'
     | '/terms'
+    | '/app/billing'
     | '/app/kb'
     | '/app/settings'
     | '/app/tickets'
@@ -422,6 +434,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppKbRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/billing': {
+      id: '/app/billing'
+      path: '/billing'
+      fullPath: '/app/billing'
+      preLoaderRoute: typeof AppBillingRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/tickets/$ticketId': {
       id: '/app/tickets/$ticketId'
       path: '/$ticketId'
@@ -462,6 +481,7 @@ const AppTicketsRouteWithChildren = AppTicketsRoute._addFileChildren(
 )
 
 interface AppRouteChildren {
+  AppBillingRoute: typeof AppBillingRoute
   AppKbRoute: typeof AppKbRouteWithChildren
   AppSettingsRoute: typeof AppSettingsRoute
   AppTicketsRoute: typeof AppTicketsRouteWithChildren
@@ -469,6 +489,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppBillingRoute: AppBillingRoute,
   AppKbRoute: AppKbRouteWithChildren,
   AppSettingsRoute: AppSettingsRoute,
   AppTicketsRoute: AppTicketsRouteWithChildren,

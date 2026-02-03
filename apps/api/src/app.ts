@@ -18,6 +18,9 @@ import { loggerMiddleware } from "./middleware/logger";
 import { initSentry } from "./lib/sentry";
 import { initDatadog } from "./lib/datadog";
 import { rateLimitRedis } from "./middleware/rate-limit-redis";
+import { APIError, formatErrorResponse } from "./lib/errors";
+import { captureException as sentryCaptureException } from "./lib/sentry";
+import { setSecurityHeaders } from "./lib/security";
 import type { AppEnv, InitialContext } from "./context";
 
 /**
@@ -43,6 +46,12 @@ export function createApp() {
       ...(c.env || {}),
     };
     await next();
+  });
+  
+  // Security headers middleware
+  app.use("*", async (c, next) => {
+    await next();
+    setSecurityHeaders(c.res.headers);
   });
 
   // Rate limiting middleware
@@ -87,6 +96,17 @@ export function createApp() {
     interceptors: [
       onError((error: unknown) => {
         console.error("[RPC Error]", error);
+        
+        // Capture in Sentry
+        if (error instanceof Error) {
+          sentryCaptureException(error);
+        }
+        
+        // Handle APIError
+        if (error instanceof APIError) {
+          // APIError will be handled by oRPC's error handling
+          return;
+        }
       }),
     ],
   });
@@ -130,12 +150,29 @@ export function createApp() {
           bearerAuth: {
             type: "http",
             scheme: "bearer",
+            bearerFormat: "JWT",
+            description: "JWT token from Better Auth",
           },
         },
       },
+      tags: [
+        { name: "Tickets", description: "Ticket management operations" },
+        { name: "System", description: "System endpoints" },
+      ],
     });
 
     return c.json(spec);
+  });
+
+  // Scalar API Documentation UI
+  app.get("/api/docs", async (c: any) => {
+    const { Scalar } = await import("@scalar/hono-api-reference");
+    return Scalar({
+      spec: {
+        url: "/api/openapi.json",
+      },
+      theme: "purple",
+    })(c);
   });
 
   return app;

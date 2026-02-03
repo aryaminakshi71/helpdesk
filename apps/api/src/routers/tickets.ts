@@ -8,6 +8,7 @@ import { z } from 'zod'
 import { eq, and, ilike, desc, sql, count } from 'drizzle-orm'
 import { orgAuthed, getDb, schema } from '../procedures'
 import { getOrCache, invalidateCache } from '@helpdesk/storage/redis'
+import { trackQuery } from '../lib/db-performance'
 import {
   createTicketSchema,
   updateTicketSchema,
@@ -113,8 +114,9 @@ export const ticketsRouter = {
       const db = getDb(context)
 
       // Cache ticket with related data (30 minutes TTL)
-      return await getOrCache(
-        `ticket:${input.id}`,
+      return await trackQuery('getTicket', async () => {
+        return await getOrCache(
+          `ticket:${input.id}`,
         async () => {
           const [ticket] = await db
             .select()

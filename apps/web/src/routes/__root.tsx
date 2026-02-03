@@ -12,6 +12,7 @@ import { PostHogProvider } from '@/components/providers/posthog-provider'
 import { ErrorPage, NotFoundPage } from '@/components/error'
 import { generateOrganizationSchema, generateWebSiteSchema, getHelpdeskOrganizationSchema } from '@/lib/structured-data'
 import { registerServiceWorker } from '@/lib/service-worker'
+import { addSkipLink } from '@/lib/accessibility'
 
 import appCss from '@/styles/globals.css?url'
 
@@ -44,6 +45,8 @@ function RootDocument() {
   // Register service worker
   useEffect(() => {
     registerServiceWorker();
+    // Add skip link for accessibility
+    addSkipLink("main-content", "Skip to main content");
   }, []);
 
   // Create a single QueryClient instance that persists across renders
@@ -88,7 +91,7 @@ function RootDocument() {
           Skip to main content
         </a>
         <QueryClientProvider client={queryClient}>
-          <main id="main-content">
+          <main id="main-content" tabIndex={-1}>
             <Outlet />
           </main>
           <Toaster position="top-right" richColors />
