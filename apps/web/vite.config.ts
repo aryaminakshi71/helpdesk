@@ -8,9 +8,16 @@ import tailwindcss from '@tailwindcss/vite'
 import { visualizer } from "rollup-plugin-visualizer";
 
 import path from "node:path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig(({ mode }) => {
+  // Capture PORT from shell BEFORE loadEnv (which might load PORT from .env)
+  const shellPort = process.env.PORT;
   const env = loadEnv(mode, path.resolve(__dirname, "../../"), "");
+  // PORT from shell environment takes highest priority
+  const port = shellPort || env.PORT || "3000";
 
   return {
     // Vite equivalent of Next.js transpilePackages for monorepo workspace packages
@@ -76,9 +83,9 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
-      port: Number(process.env.PORT) || 3000,
+      port: Number(port),
       host: true,
-      strictPort: false,
+      strictPort: true,
     },
     build: {
       target: 'esnext',

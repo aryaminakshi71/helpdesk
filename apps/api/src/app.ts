@@ -54,11 +54,7 @@ export function createApp() {
     setSecurityHeaders(c.res.headers);
   });
 
-  // Rate limiting middleware (matching CRM/Queue/Invoicing pattern)
-  app.use("/api/*", rateLimitRedis({ limiterType: "api" }));
-  app.use("/api/auth/*", rateLimitRedis({ limiterType: "auth" }));
-
-  // Health check (non-RPC) - defined AFTER rate limiting (matching CRM/Queue/Invoicing pattern)
+  // Health check (non-RPC) - defined BEFORE rate limiting to avoid delays
   app.get("/api/health", (c: any) => {
     return c.json({
       status: "ok",
@@ -66,6 +62,10 @@ export function createApp() {
       version: "1.0.0",
     });
   });
+
+  // Rate limiting middleware (matching CRM/Queue/Invoicing pattern)
+  app.use("/api/*", rateLimitRedis({ limiterType: "api" }));
+  app.use("/api/auth/*", rateLimitRedis({ limiterType: "auth" }));
 
   // Better Auth handler (includes Stripe webhook at /api/auth/stripe/webhook)
   app.on(["GET", "POST"], "/api/auth/*", async (c: any) => {

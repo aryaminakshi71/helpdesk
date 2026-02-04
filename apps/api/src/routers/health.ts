@@ -134,13 +134,22 @@ export const healthRouter = {
         },
         uptime: Math.floor((Date.now() - startTime) / 1000),
         performance: (() => {
-          const stats = getQueryStats();
-          const slowQueries = getSlowQueries(1000);
-          return {
-            avgQueryTime: stats.avgDuration,
-            slowQueries: slowQueries.length,
-            errorRate: stats.errorRate,
-          };
+          try {
+            const stats = getQueryStats();
+            const slowQueries = getSlowQueries(1000);
+            return {
+              avgQueryTime: stats.avgDuration,
+              slowQueries: slowQueries.length,
+              errorRate: stats.errorRate,
+            };
+          } catch (error) {
+            // Performance stats are optional, don't fail health check if they error
+            return {
+              avgQueryTime: 0,
+              slowQueries: 0,
+              errorRate: 0,
+            };
+          }
         })(),
       };
     }),

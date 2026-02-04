@@ -67,6 +67,12 @@ export function rateLimitRedis(options: Partial<RateLimitOptions> = {}) {
   };
 
   return async (c: Context, next: Next) => {
+    // Skip rate limiting for health endpoints
+    if (c.req.path === "/api/health" || c.req.path === "/health") {
+      await next();
+      return;
+    }
+    
     const key = opts.keyGenerator!(c);
     
     if (opts.limiterType && rateLimiters[opts.limiterType]) {
