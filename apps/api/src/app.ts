@@ -33,7 +33,7 @@ export function createApp() {
   initSentry();
   initDatadog();
 
-  // Global middleware
+  // Global middleware (matching CRM/Queue/Invoicing pattern)
   app.use("*", cors({ origin: (origin: string | null) => origin, credentials: true }));
   app.use("*", requestId());
   app.use("*", loggerMiddleware);
@@ -54,11 +54,11 @@ export function createApp() {
     setSecurityHeaders(c.res.headers);
   });
 
-  // Rate limiting middleware
+  // Rate limiting middleware (matching CRM/Queue/Invoicing pattern)
   app.use("/api/*", rateLimitRedis({ limiterType: "api" }));
   app.use("/api/auth/*", rateLimitRedis({ limiterType: "auth" }));
 
-  // Health check (non-RPC)
+  // Health check (non-RPC) - defined AFTER rate limiting (matching CRM/Queue/Invoicing pattern)
   app.get("/api/health", (c: any) => {
     return c.json({
       status: "ok",
@@ -112,6 +112,12 @@ export function createApp() {
   });
 
   app.use("/api/rpc/*", async (c: any, next: any) => {
+    // Skip RPC handler for health check
+    const url = new URL(c.req.url);
+    if (url.pathname === "/api/health") {
+      return next();
+    }
+    
     const initialContext: InitialContext = {
       env: c.env,
       headers: c.req.raw.headers,

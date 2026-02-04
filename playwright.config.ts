@@ -29,10 +29,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'cd apps/web && SKIP_CLOUDFLARE=true bun vite dev --port 3004',
+    command: 'cd apps/web && SKIP_CLOUDFLARE=true PORT=3004 bun run dev -- --port 3004',
     url: 'http://localhost:3004',
     reuseExistingServer: !process.env.CI,
-    timeout: 180000, // 3 minutes - TanStack Router needs more time
+    timeout: 300000, // 5 minutes - TanStack Router needs more time
     stdout: 'pipe',
     stderr: 'pipe',
     // Wait for Vite + TanStack Router to be fully ready

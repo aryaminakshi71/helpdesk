@@ -25,7 +25,16 @@ const defaultLimiters = {
 
 const createRateLimiter = (type: "api" | "auth" | "strict") => {
   const redisClient = redis.client;
-  if (!redisClient) return null;
+  // Check if Redis client is a no-op client (not configured)
+  // No-op clients return null or have a specific property
+  if (!redisClient || (redisClient as any).__noop) return null;
+  
+  // Additional check: if Redis URL is empty or invalid, don't create limiter
+  const url = process.env.UPSTASH_REDIS_REST_URL || "";
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN || "";
+  if (!url || !token || url.trim() === "" || token.trim() === "") {
+    return null;
+  }
   
   const config = defaultLimiters[type];
   return new Ratelimit({
@@ -62,19 +71,25 @@ export function rateLimitRedis(options: Partial<RateLimitOptions> = {}) {
     
     if (opts.limiterType && rateLimiters[opts.limiterType]) {
       const limiter = rateLimiters[opts.limiterType]!;
-      const result = await limiter.limit(key);
-      
-      if (!result.success) {
-        const retryAfter = Math.ceil((result.reset - Date.now()) / 1000);
-        throw new RateLimitError(
-          `Rate limit exceeded. Please try again in ${retryAfter} seconds.`,
-          retryAfter,
-        );
+      try {
+        const result = await limiter.limit(key);
+        
+        if (!result.success) {
+          const retryAfter = Math.ceil((result.reset - Date.now()) / 1000);
+          throw new RateLimitError(
+            `Rate limit exceeded. Please try again in ${retryAfter} seconds.`,
+            retryAfter,
+          );
+        }
+        
+        c.header("X-RateLimit-Limit", result.limit.toString());
+        c.header("X-RateLimit-Remaining", result.remaining.toString());
+        c.header("X-RateLimit-Reset", result.reset.toString());
+      } catch (err) {
+        if (err instanceof RateLimitError) throw err;
+        // Fail open if Redis fails (matching CRM pattern)
+        console.error("Rate limit error (fail open):", err);
       }
-      
-      c.header("X-RateLimit-Limit", result.limit.toString());
-      c.header("X-RateLimit-Remaining", result.remaining.toString());
-      c.header("X-RateLimit-Reset", result.reset.toString());
       
       await next();
       return;
