@@ -15,7 +15,7 @@ export default defineConfig({
     ['list'],
   ],
   use: {
-    baseURL: 'http://localhost:3004',
+    baseURL: 'http://localhost:3003',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -29,8 +29,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'cd apps/web && SKIP_CLOUDFLARE=true PORT=3004 bun run dev -- --port 3004',
-    url: 'http://localhost:3004',
+    command: 'cd apps/web && SKIP_CLOUDFLARE=true PORT=3003 bun run dev -- --port 3003',
+    url: 'http://localhost:3003',
     reuseExistingServer: !process.env.CI,
     timeout: 300000, // 5 minutes - TanStack Router needs more time
     stdout: 'pipe',

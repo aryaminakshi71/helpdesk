@@ -5,11 +5,24 @@ import { test, expect } from '@playwright/test';
  * Tests: Landing page, Sign in, Navigation, All pages, Links functionality
  */
 
+function getBaseURL(testInfo: { project: { use?: { baseURL?: string } } }): string {
+  const baseURL = testInfo.project.use?.baseURL || process.env.PLAYWRIGHT_BASE_URL;
+  if (!baseURL) {
+    throw new Error('No baseURL configured for Helpdesk tests');
+  }
+  return baseURL.replace(/\/$/, '');
+}
+
+function resolveURL(baseURL: string, path: string): string {
+  return new URL(path, `${baseURL}/`).toString();
+}
+
 test.describe('Helpdesk E2E Tests', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    const baseURL = getBaseURL(testInfo);
     await page.context().clearCookies();
     try {
-      await page.goto('http://localhost:3004', { waitUntil: 'domcontentloaded', timeout: 20000 });
+      await page.goto(baseURL, { waitUntil: 'domcontentloaded', timeout: 20000 });
     } catch (error) {
       console.warn('Landing page navigation failed, continuing...');
     }
@@ -17,7 +30,8 @@ test.describe('Helpdesk E2E Tests', () => {
   });
 
   test.describe('Landing Page & Public Pages', () => {
-    test('should load landing page without errors', async ({ page }) => {
+    test('should load landing page without errors', async ({ page }, testInfo) => {
+      const baseURL = getBaseURL(testInfo);
       const errors: string[] = [];
       page.on('console', (msg) => {
         if (msg.type() === 'error') {
@@ -25,7 +39,7 @@ test.describe('Helpdesk E2E Tests', () => {
         }
       });
 
-      const response = await page.goto('http://localhost:3004');
+      const response = await page.goto(baseURL);
       expect(response?.status()).toBe(200);
       await page.waitForTimeout(2000);
 
@@ -41,8 +55,9 @@ test.describe('Helpdesk E2E Tests', () => {
       }
     });
 
-    test('should navigate to login page', async ({ page }) => {
-      await page.goto('http://localhost:3004/login', { waitUntil: 'domcontentloaded', timeout: 15000 });
+    test('should navigate to login page', async ({ page }, testInfo) => {
+      const baseURL = getBaseURL(testInfo);
+      await page.goto(resolveURL(baseURL, 'login'), { waitUntil: 'domcontentloaded', timeout: 15000 });
       await page.waitForTimeout(2000);
 
       const emailInput = page.locator('input[type="email"]').first();
@@ -53,24 +68,27 @@ test.describe('Helpdesk E2E Tests', () => {
       expect(hasLoginForm || page.url().includes('/login')).toBe(true);
     });
 
-    test('should navigate to signup page', async ({ page }) => {
-      await page.goto('http://localhost:3004/signup', { waitUntil: 'domcontentloaded', timeout: 15000 });
+    test('should navigate to signup page', async ({ page }, testInfo) => {
+      const baseURL = getBaseURL(testInfo);
+      await page.goto(resolveURL(baseURL, 'signup'), { waitUntil: 'domcontentloaded', timeout: 15000 });
       await page.waitForTimeout(2000);
 
       const url = page.url();
       expect(url.includes('/signup') || url.includes('/login')).toBe(true);
     });
 
-    test('should navigate to blog page', async ({ page }) => {
-      await page.goto('http://localhost:3004/blog', { waitUntil: 'domcontentloaded', timeout: 15000 });
+    test('should navigate to blog page', async ({ page }, testInfo) => {
+      const baseURL = getBaseURL(testInfo);
+      await page.goto(resolveURL(baseURL, 'blog'), { waitUntil: 'domcontentloaded', timeout: 15000 });
       await page.waitForTimeout(2000);
 
       const url = page.url();
       expect(url.includes('/blog')).toBe(true);
     });
 
-    test('should navigate to about page', async ({ page }) => {
-      await page.goto('http://localhost:3004/about', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    test('should navigate to about page', async ({ page }, testInfo) => {
+      const baseURL = getBaseURL(testInfo);
+      await page.goto(resolveURL(baseURL, 'about'), { waitUntil: 'domcontentloaded', timeout: 30000 });
       await page.waitForTimeout(2000);
 
       const url = page.url();
@@ -79,8 +97,9 @@ test.describe('Helpdesk E2E Tests', () => {
   });
 
   test.describe('Sign In Flow', () => {
-    test('should display login page correctly', async ({ page }) => {
-      await page.goto('http://localhost:3004/login', { waitUntil: 'domcontentloaded', timeout: 15000 });
+    test('should display login page correctly', async ({ page }, testInfo) => {
+      const baseURL = getBaseURL(testInfo);
+      await page.goto(resolveURL(baseURL, 'login'), { waitUntil: 'domcontentloaded', timeout: 15000 });
       await page.waitForTimeout(2000);
 
       const bodyText = await page.textContent('body');
@@ -92,10 +111,11 @@ test.describe('Helpdesk E2E Tests', () => {
   });
 
   test.describe('App Pages (Requires Auth)', () => {
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({ page }, testInfo) => {
+      const baseURL = getBaseURL(testInfo);
       // Set localStorage to simulate demo mode or auth
       try {
-        await page.goto('http://localhost:3004', { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await page.goto(baseURL, { waitUntil: 'domcontentloaded', timeout: 30000 });
         await page.evaluate(() => {
           localStorage.setItem('demo_mode', 'true');
           localStorage.setItem('user', JSON.stringify({ id: 'demo', email: 'demo@helpdesk.com', name: 'Demo User' }));
@@ -105,8 +125,9 @@ test.describe('Helpdesk E2E Tests', () => {
       }
     });
 
-    test('dashboard page should load', async ({ page }) => {
-      await page.goto('http://localhost:3004/app', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    test('dashboard page should load', async ({ page }, testInfo) => {
+      const baseURL = getBaseURL(testInfo);
+      await page.goto(resolveURL(baseURL, 'app'), { waitUntil: 'domcontentloaded', timeout: 30000 });
       await page.waitForTimeout(2000);
 
       const url = page.url();
@@ -114,24 +135,27 @@ test.describe('Helpdesk E2E Tests', () => {
       expect(url.includes('/app') || url.includes('/login')).toBe(true);
     });
 
-    test('tickets page should load', async ({ page }) => {
-      await page.goto('http://localhost:3004/app/tickets', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    test('tickets page should load', async ({ page }, testInfo) => {
+      const baseURL = getBaseURL(testInfo);
+      await page.goto(resolveURL(baseURL, 'app/tickets'), { waitUntil: 'domcontentloaded', timeout: 30000 });
       await page.waitForTimeout(2000);
 
       const url = page.url();
       expect(url.includes('/app/tickets') || url.includes('/login')).toBe(true);
     });
 
-    test('knowledge base page should load', async ({ page }) => {
-      await page.goto('http://localhost:3004/app/kb', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    test('knowledge base page should load', async ({ page }, testInfo) => {
+      const baseURL = getBaseURL(testInfo);
+      await page.goto(resolveURL(baseURL, 'app/kb'), { waitUntil: 'domcontentloaded', timeout: 30000 });
       await page.waitForTimeout(2000);
 
       const url = page.url();
       expect(url.includes('/app/kb') || url.includes('/login')).toBe(true);
     });
 
-    test('settings page should load', async ({ page }) => {
-      await page.goto('http://localhost:3004/app/settings', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    test('settings page should load', async ({ page }, testInfo) => {
+      const baseURL = getBaseURL(testInfo);
+      await page.goto(resolveURL(baseURL, 'app/settings'), { waitUntil: 'domcontentloaded', timeout: 30000 });
       await page.waitForTimeout(2000);
 
       const url = page.url();
@@ -140,8 +164,9 @@ test.describe('Helpdesk E2E Tests', () => {
   });
 
   test.describe('Navigation & Links', () => {
-    test('should navigate between public pages', async ({ page }) => {
-      await page.goto('http://localhost:3004');
+    test('should navigate between public pages', async ({ page }, testInfo) => {
+      const baseURL = getBaseURL(testInfo);
+      await page.goto(baseURL);
       await page.waitForTimeout(1000);
 
       // Try to find and click navigation links
@@ -150,7 +175,7 @@ test.describe('Helpdesk E2E Tests', () => {
 
       for (const link of links) {
         try {
-          await page.goto(`http://localhost:3004${link}`, { waitUntil: 'domcontentloaded', timeout: 5000 });
+          await page.goto(resolveURL(baseURL, link), { waitUntil: 'domcontentloaded', timeout: 5000 });
           await page.waitForTimeout(500);
           const url = page.url();
           if (url.includes(link)) {
@@ -161,13 +186,14 @@ test.describe('Helpdesk E2E Tests', () => {
         }
       }
 
-      expect(successCount > 0 || page.url().includes('localhost:3004')).toBe(true);
+      expect(successCount > 0 || page.url().includes(baseURL)).toBe(true);
     });
   });
 
   test.describe('Error Handling', () => {
-    test('should handle 404 gracefully', async ({ page }) => {
-      const response = await page.goto('http://localhost:3004/nonexistent-page', { waitUntil: 'domcontentloaded' });
+    test('should handle 404 gracefully', async ({ page }, testInfo) => {
+      const baseURL = getBaseURL(testInfo);
+      const response = await page.goto(resolveURL(baseURL, 'nonexistent-page'), { waitUntil: 'domcontentloaded' });
       // Should either show 404 or redirect
       const status = response?.status() || 0;
       expect(status >= 200 && status < 600).toBe(true);
@@ -175,9 +201,10 @@ test.describe('Helpdesk E2E Tests', () => {
   });
 
   test.describe('Performance', () => {
-    test('should load within reasonable time', async ({ page }) => {
+    test('should load within reasonable time', async ({ page }, testInfo) => {
+      const baseURL = getBaseURL(testInfo);
       const start = Date.now();
-      await page.goto('http://localhost:3004');
+      await page.goto(baseURL);
       await page.waitForLoadState('networkidle');
       const loadTime = Date.now() - start;
       // Allow up to 15 seconds for SSR apps

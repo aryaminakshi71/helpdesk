@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, path.resolve(__dirname, "../../"), "");
   // PORT from shell environment takes highest priority
   const port = shellPort || env.PORT || "3000";
+  const devtoolsPort = Number.isFinite(Number(port)) ? Number(port) + 10000 : 42069;
 
   return {
     // Vite equivalent of Next.js transpilePackages for monorepo workspace packages
@@ -111,7 +112,11 @@ export default defineConfig(({ mode }) => {
         cloudflare({ viteEnvironment: { name: 'ssr' } })
       ] : []),
       // TanStack devtools
-      devtools(),
+      devtools({
+        eventBusConfig: {
+          port: devtoolsPort,
+        },
+      }),
       // Tailwind CSS v4
       tailwindcss(),
       // TanStack Start SSR framework

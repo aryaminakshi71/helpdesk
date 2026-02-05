@@ -1,10 +1,19 @@
 import { test, expect } from '@playwright/test'
 
+function getBaseURL(testInfo: { project: { use?: { baseURL?: string } } }): string {
+  const baseURL = testInfo.project.use?.baseURL || process.env.PLAYWRIGHT_BASE_URL
+  if (!baseURL) {
+    throw new Error('No baseURL configured for Helpdesk tests')
+  }
+  return baseURL.replace(/\/$/, '')
+}
+
 test.describe('HELPDESK E2E Tests', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    const baseURL = getBaseURL(testInfo)
     await page.context().clearCookies()
     try {
-      await page.goto('http://localhost:3004', { 
+      await page.goto(baseURL, { 
         waitUntil: 'domcontentloaded', 
         timeout: 20000 
       })
@@ -14,12 +23,14 @@ test.describe('HELPDESK E2E Tests', () => {
     await page.waitForTimeout(1000)
   })
 
-  test('should load landing page', async ({ page }) => {
-    const response = await page.goto('http://localhost:3004')
+  test('should load landing page', async ({ page }, testInfo) => {
+    const baseURL = getBaseURL(testInfo)
+    const response = await page.goto(baseURL)
     expect(response?.status()).toBe(200)
   })
 
-  test('should have no console errors', async ({ page }) => {
+  test('should have no console errors', async ({ page }, testInfo) => {
+    const baseURL = getBaseURL(testInfo)
     const errors: string[] = []
     page.on('console', (msg) => {
       if (msg.type() === 'error') {
@@ -27,7 +38,7 @@ test.describe('HELPDESK E2E Tests', () => {
       }
     })
 
-    await page.goto('http://localhost:3004')
+    await page.goto(baseURL)
     await page.waitForTimeout(2000)
 
     const criticalErrors = errors.filter(e => 

@@ -8,8 +8,9 @@
 import * as Sentry from "@sentry/node";
 
 const isConfigured = !!process.env.SENTRY_DSN;
+const shouldWarnMissing = process.env.NODE_ENV === "production";
 
-if (!isConfigured) {
+if (!isConfigured && shouldWarnMissing) {
   console.warn("SENTRY_DSN not set - Error tracking disabled");
 }
 

@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Free port 3004 for Helpdesk tests
+# Free port 3003 for Helpdesk tests
 # Usage: ./scripts/free-port.sh
 
-PORT=3004
+PORT=3003
 
 echo "Checking for processes using port $PORT..."
 
