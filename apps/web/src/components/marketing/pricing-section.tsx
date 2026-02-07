@@ -44,7 +44,7 @@ const plans: PricingPlan[] = [
             "Priority support",
         ],
         highlighted: true,
-        cta: "Start free trial",
+        cta: "Subscribe with Stripe",
         ctaHref: "/signup",
     },
     {
